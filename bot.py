@@ -27,25 +27,30 @@ from handlers import crop, disease, weather, market, profile, admin
 
 async def main():
     """Botni ishga tushirish"""
-    # Logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        stream=sys.stdout,
-    )
+    # Logging (UTF-8 for Windows compatibility)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    try:
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    except Exception:
+        pass
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
     logger = logging.getLogger(__name__)
 
     # Token tekshirish
     if not BOT_TOKEN or BOT_TOKEN == "your_bot_token_here":
-        logger.error("❌ BOT_TOKEN topilmadi!")
+        logger.error("BOT_TOKEN topilmadi!")
         logger.error("   .env fayliga BOT_TOKEN=your_token yozing")
         logger.error("   yoki .env.example dan nusxa oling: copy .env.example .env")
         sys.exit(1)
 
     # Database
-    logger.info("📦 Ma'lumotlar bazasi tayyorlanmoqda...")
+    logger.info("Ma'lumotlar bazasi tayyorlanmoqda...")
     await init_db()
-    logger.info("✅ Ma'lumotlar bazasi tayyor!")
+    logger.info("Ma'lumotlar bazasi tayyor!")
 
     # Bot va Dispatcher
     bot = Bot(
@@ -71,9 +76,9 @@ async def main():
     dp.include_router(admin.router)
 
     # Bot ma'lumotlari
-    logger.info("🌾 Qishloq-AI Bot ishga tushmoqda...")
-    logger.info("🤖 Bot: @QishloqAI_bot")
-    logger.info("📋 Buyruqlar: /start, /help, /menu, /soil, /weather, /market, /profile, /admin")
+    logger.info("Qishloq-AI Bot ishga tushmoqda...")
+    logger.info("Bot: @QishloqAI_bot")
+    logger.info("Buyruqlar: /start, /help, /menu, /soil, /weather, /market, /profile, /admin")
 
     # Polling boshlash
     try:
